@@ -1630,10 +1630,73 @@ void draw_people() {
 	draw_hp();
 }
 
+// Mod: Cool after image effect 😎👉👉
+#define KID_TRAIL_LEN 4 // number of previous sprites to keep in memory. Adjust as needed.
+
+typedef struct kid_trail_sample {
+	short x;
+	short y;
+	byte id;
+	byte chtab;
+	sbyte direction;
+} kid_trail_sample;
+
+static kid_trail_sample kid_trail[KID_TRAIL_LEN];
+static short kid_trail_count;
+static short kid_trail_next;
+static byte kid_trail_room; 
+
+static void clear_kid_trail() {
+	kid_trail_count = 0;
+	kid_trail_next = 0;
+}
+
+static void remember_kid_trail() {
+	kid_trail[kid_trail_next].x = obj_x;
+	kid_trail[kid_trail_next].y = obj_y;
+	kid_trail[kid_trail_next].id = obj_id;
+	kid_trail[kid_trail_next].chtab = obj_chtab;
+	kid_trail[kid_trail_next].direction = obj_direction;
+	kid_trail_next++;
+	if (kid_trail_next >= KID_TRAIL_LEN) kid_trail_next = 0;
+	if (kid_trail_count < KID_TRAIL_LEN) kid_trail_count++;
+}
+
+static void draw_kid_trail() {
+	short i;
+	short index;
+	if (kid_trail_count == 0) return;
+	index = kid_trail_next - 1;
+	if (index < 0) index = KID_TRAIL_LEN - 1;
+	obj_tilepos = 30;
+	reset_obj_clip();
+	for (i = 0; i < kid_trail_count; i++) {
+		if (objtable_count >= 50) break;
+		obj_x = kid_trail[index].x;
+		obj_y = kid_trail[index].y;
+		obj_id = kid_trail[index].id;
+		obj_chtab = kid_trail[index].chtab;
+		obj_direction = kid_trail[index].direction;
+		add_objtable(0);
+		index--;
+		if (index < 0) index = KID_TRAIL_LEN - 1;
+	}
+}
+
 // seg008:22A2
 void draw_kid() {
+	if (Kid.alive >= 0 || Kid.room != kid_trail_room) { // if in a new room, clear the trail
+		clear_kid_trail();
+	}
+	kid_trail_room = Kid.room;
 	if (Kid.room != 0 && Kid.room == drawn_room) {
+		if (Kid.alive < 0) {
+			draw_kid_trail();
+		}
 		add_kid_to_objtable();
+		if (Kid.alive < 0) {
+			remember_kid_trail();
+		}
 		if (hitp_delta < 0) {
 			draw_hurt_splash();
 		}
