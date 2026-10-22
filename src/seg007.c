@@ -289,7 +289,24 @@ void animate_chomper() {
 	if (trob.type >= 0) {
 		word blood = curr_modifier & 0x80;
 		word frame = (curr_modifier & 0x7F) + 1;
-		if (frame > /*15*/ custom->chomper_speed) {
+
+
+		/* Mod: The chomper is shy... is chomps slower and slower the closer the prince is */
+		int limit = custom->chomper_speed;
+		int dist = 10;
+		if (Kid.room != 0 && trob.room == Kid.room) {
+			dist = ABS((trob.tilepos % 10) - Kid.curr_col);
+		}
+		if (dist <= 1) {
+			limit *= 2;
+		} else if (dist < 3) {
+			limit += (limit * (3 - dist)) / 2;
+		} else if (dist > 3) {
+			limit -= (limit * (dist - 3)) / 2;
+			if (limit < 6) limit = 6;
+		}
+		if (limit > 127) limit = 127; 
+		if (frame > limit) {
 			frame = 1;
 		}
 		curr_modifier = blood | frame;
