@@ -450,6 +450,14 @@ void check_chomped_kid() {
 
 // seg004:07BF
 void chomped() {
+	// Mod: Portalic Chompers: Getting CHOMPED simply pushes back the prince 
+	if (Char.charid == charid_0_kid) {
+			Char.x = char_dx_forward(-1 * TILE_SIZEX);
+			Char.y = y_land[Char.curr_row + 1];
+			Char.fall_y = 0;
+		return;
+	}
+	
 	#ifdef FIX_SKELETON_CHOMPER_BLOOD
 	if (!(fixes->fix_skeleton_chomper_blood && Char.charid == charid_4_skeleton))
 	#endif
