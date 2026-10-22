@@ -1862,6 +1862,10 @@ void proc_get_object() {
 		flash_color = color_14_brightyellow;
 		flash_time = 8;
 	} else {
+		// Mod: Potion roulette - Potion effects are random. Except open door potion, that would SUCK
+		if(pickup_obj_type != 6) {
+			pickup_obj_type = prandom(255) % 5 + 1;
+		}
 		switch (pickup_obj_type) {
 			case 1: // health
 				if (hitp_curr != hitp_max) {
